@@ -15,7 +15,7 @@ const BlogIndex = ({ data, location }) => {
       <SEO title="All posts" />
       <Bio />
       {posts.map(({ node }) => {
-        const title = node.title_en || node.fields.slug
+        const title = node.title_en 
         return (
           <article >
             <header>
@@ -24,9 +24,7 @@ const BlogIndex = ({ data, location }) => {
                   marginBottom: rhythm(1 / 4),
                 }}
               >
-                <Link style={{ boxShadow: `none` }} to={node.fields.slug}>
-                  {title}
-                </Link>
+                  {title_en}
               </h3>
               <small>{node.frontmatter.date}</small>
             </header>
