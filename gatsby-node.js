@@ -1,6 +1,124 @@
 const path = require(`path`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
+const fetch = require("node-fetch")
+const csv2json = require("csvtojson")
 
+// new
+const googleSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOQRLgLGVryieIwB7HKJbEATt_G9SfkbFX_H7mNC1x3i9D3ZhQpzfRBQTqfdt4954lgET6vpuxJrXd/pubhtml?gid=0'
+
+const GOOGLE_SPREADSHEET_ID = "14kreo2vRo1XCUXqFLcMApVtYmvkEzWBDm6b8fzJNKEc"
+
+
+const createPublishedGoogleSpreadsheetNode = async (
+  { actions: { createNode }, createNodeId, createContentDigest },
+  publishedURL,
+  type,
+  { skipFirstLine = false, alwaysEnabled = false, subtype = null }
+) => {
+  // All table has first row reserved
+  const result = await fetch(
+    `${publishedURL}&single=true&output=csv&headers=0${
+      skipFirstLine ? "&range=A2:ZZ" : ""
+    }`
+  )
+  const data = await result.text()
+  const records = await csv2json().fromString(data)
+  records
+    .filter(
+      r => alwaysEnabled || (isDebug && r.enabled === "N") || r.enabled === "Y"
+    )
+    .forEach((p, i) => {
+      // create node for build time data example in the docs
+      const meta = {
+        // required fields
+        id: createNodeId(
+          `${type.toLowerCase()}${subtype ? `-${subtype}` : ""}-${i}`
+        ),
+        parent: null,
+        children: [],
+        internal: {
+          type,
+          contentDigest: createContentDigest(p),
+        },
+      }
+      const node = Object.assign({}, { ...p, subtype }, meta)
+      createNode(node)
+    })
+}
+
+// don't know if this function is needed
+const createNode = async (
+  { actions: { createNode }, createNodeId, createContentDigest },
+  sheetName,
+  type
+) => {
+  // All table has first row reserved
+  const result = await fetch(
+    `https://docs.google.com/spreadsheets/d/${GOOGLE_SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}&range=A2:ZZ&headers=0`
+  )
+  const data = await result.text()
+  const records = await csv2json().fromString(data)
+  records.forEach((p, i) => {
+    // create node for build time data example in the docs
+    const meta = {
+      // required fields
+      id: createNodeId(`${type.toLowerCase()}-${i}`),
+      parent: null,
+      children: [],
+      internal: {
+        type,
+        contentDigest: createContentDigest(p),
+      },
+    }
+    const node = Object.assign({}, p, meta)
+    createNode(node)
+  })
+}
+
+
+
+exports.sourceNodes = async props => {
+  await Promise.all([
+    createPublishedGoogleSpreadsheetNode(
+      props,
+      googleSheet,
+      "Blog",
+      { skipFirstLine: true }
+    ),
+    ])
+}
+
+
+
+exports.createPages = async ({ graphql, actions }) => {
+
+  const result = await graphql(`
+    query {
+      allBlog {
+        edges {
+          node {
+            title_en
+            title_zh
+            description_en
+            description_zh
+            detail_en
+            detail_zh
+            date
+          }
+        }
+      }
+    }
+  `)
+
+  return Promise.resolve(null)
+}
+
+
+
+
+
+
+/* old
 exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions
 
@@ -62,3 +180,4 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
     })
   }
 }
+*/
