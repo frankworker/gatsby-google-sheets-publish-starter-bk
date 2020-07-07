@@ -90,9 +90,9 @@ exports.sourceNodes = async props => {
 }
 
 
-/*
-exports.createPages = async ({ graphql, actions }) => {
 
+exports.createPages = async ({ graphql, actions }) => {
+  const { createPage } = actions
   const result = await graphql(`
     query {
       allBlog {
@@ -111,10 +111,23 @@ exports.createPages = async ({ graphql, actions }) => {
     }
   `)
 
-  return Promise.resolve(null)
+  if (result.errors) {
+    throw result.errors
+  }
+
+  exports.onCreateNode = ({ node, actions, getNode }) => {
+  const { createNodeField } = actions
+
+  if (node.internal.type === `MarkdownRemark`) {
+    const value = createFilePath({ node, getNode })
+    createNodeField({
+      name: `slug`,
+      node,
+      value,
+    })
+  }
 }
 
-*/
 
 
 
