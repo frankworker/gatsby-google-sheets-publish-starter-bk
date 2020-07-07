@@ -15,16 +15,20 @@ const BlogIndex = ({ data, location }) => {
       <SEO title="All posts" />
       <Bio />
       {posts.map(({ node }) => {
-        const title = node.title_en 
+        const title = node.title_en || node.fields.slug
         return (
+          <article >
             <header>
               <h3
                 style={{
                   marginBottom: rhythm(1 / 4),
                 }}
               >
+                <Link style={{ boxShadow: `none` }} to={node.fields.slug}>
+                  {title}
+                </Link>
               </h3>
-              <small>{node.date}</small>
+              <small>{node.frontmatter.date}</small>
             </header>
             <section>
               <p
@@ -33,6 +37,7 @@ const BlogIndex = ({ data, location }) => {
                 }}
               />
             </section>
+          </article>
         )
       })}
     </Layout>
@@ -57,4 +62,4 @@ export const pageQuery = graphql(`
         }
       }
     }
-  `
+  `)

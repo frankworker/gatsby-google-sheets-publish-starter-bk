@@ -5,7 +5,7 @@ const csv2json = require("csvtojson")
 
 // new
 const googleSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOQRLgLGVryieIwB7HKJbEATt_G9SfkbFX_H7mNC1x3i9D3ZhQpzfRBQTqfdt4954lgET6vpuxJrXd/pubhtml?gid=0'
-
+const isDebug = process.env.DEBUG_MODE === "true"
 const GOOGLE_SPREADSHEET_ID = "14kreo2vRo1XCUXqFLcMApVtYmvkEzWBDm6b8fzJNKEc"
 
 
@@ -25,6 +25,7 @@ const createPublishedGoogleSpreadsheetNode = async (
   const records = await csv2json().fromString(data)
   records
     .filter(
+        
       r => alwaysEnabled || (isDebug && r.enabled === "N") || r.enabled === "Y"
     )
     .forEach((p, i) => {
