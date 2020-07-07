@@ -90,7 +90,7 @@ exports.sourceNodes = async props => {
 }
 
 
-
+/*
 exports.createPages = async ({ graphql, actions }) => {
 
   const result = await graphql(`
@@ -114,7 +114,7 @@ exports.createPages = async ({ graphql, actions }) => {
   return Promise.resolve(null)
 }
 
-
+*/
 
 
 
