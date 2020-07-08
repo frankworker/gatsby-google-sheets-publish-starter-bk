@@ -58,7 +58,27 @@ exports.sourceNodes = async props => {
     ])
 }
 
+exports.onCreatePage = async ({ page, actions }) => {
+  const { createPage, deletePage } = actions
+  return new Promise(resolve => {
+    // If it is already eng path we skip to re-generate the locale
+    if (!page.path.match(/^\/en/)) {
+      deletePage(page)
+      LANGUAGES.forEach(lang => {
+        createPage({
+          ...page,
+          path: getPath(lang, page.path),
+          context: {
+            ...page.context,
+            locale: lang,
+          },
+        })
+      })
+    }
 
+    resolve()
+  })
+}
 
 exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions
