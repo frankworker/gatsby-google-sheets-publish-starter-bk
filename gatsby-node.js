@@ -2,7 +2,6 @@ const path = require(`path`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
 const fetch = require("node-fetch")
 const csv2json = require("csvtojson")
-const { getPath, getWarTipPath } = require("./src/utils/urlHelper")
 
 // new
 const googleSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOQRLgLGVryieIwB7HKJbEATt_G9SfkbFX_H7mNC1x3i9D3ZhQpzfRBQTqfdt4954lgET6vpuxJrXd/pub?gid=0'
@@ -60,23 +59,44 @@ exports.sourceNodes = async props => {
 }
 
 
-exports.onCreatePage = async ({ page, actions }) => {
-  const { createPage, deletePage } = actions
-  return new Promise(resolve => {
-    // If it is already eng path we skip to re-generate the locale
-    if (!page.path.match(/^\/en/)) {
-      deletePage(page)
-      createPage({
-          ...page,
-          path: getPath( page.path),
-          context: {
-          ...page.context,
-          },
-      })
-    }
 
-    resolve()
-  })
+exports.createPages = async ({ graphql, actions }) => {
+  const { createPage } = actions
+  const result = await graphql(`
+    query {
+      allBlog {
+        edges {
+          node {
+            title_en
+            title_zh
+            description_en
+            description_zh
+            detail_en
+            detail_zh
+            date
+          }
+        }
+      }
+    }
+  `)
+
+  if (result.errors) {
+    throw result.errors
+  }
+
+  exports.onCreateNode = ({ node, actions, getNode }) => {
+  const { createNodeField } = actions
+
+  if (node.internal.type === `MarkdownRemark`) {
+    const value = createFilePath({ node, getNode })
+    createNodeField({
+      name: `slug`,
+      node,
+      value,
+    })
+  }
+    }
+  return Promise.resolve(null)
 }
 
 
