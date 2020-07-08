@@ -6,8 +6,6 @@ const csv2json = require("csvtojson")
 // new
 const googleSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOQRLgLGVryieIwB7HKJbEATt_G9SfkbFX_H7mNC1x3i9D3ZhQpzfRBQTqfdt4954lgET6vpuxJrXd/pub?gid=0'
 const isDebug = process.env.DEBUG_MODE === "true"
-const GOOGLE_SPREADSHEET_ID = "14kreo2vRo1XCUXqFLcMApVtYmvkEzWBDm6b8fzJNKEc"
-
 
 const createPublishedGoogleSpreadsheetNode = async (
   { actions: { createNode }, createNodeId, createContentDigest },
@@ -100,19 +98,7 @@ exports.createPages = async ({ graphql, actions }) => {
   if (result.errors) {
     throw result.errors
   }
-
-  exports.onCreateNode = ({ node, actions, getNode }) => {
-  const { createNodeField } = actions
-
-  if (node.internal.type === `MarkdownRemark`) {
-    const value = createFilePath({ node, getNode })
-    createNodeField({
-      name: `slug`,
-      node,
-      value,
-    })
-  }
-    }
+  
   return Promise.resolve(null)
 }
 
