@@ -75,6 +75,8 @@ exports.onCreatePage = async ({ page, actions }) => {
   })
 }
 
+/*
+
 exports.createPages = async ({ graphql, actions }) => {
   const { createPage } = actions
   const result = await graphql(`
@@ -103,7 +105,7 @@ exports.createPages = async ({ graphql, actions }) => {
 }
 
 
-
+*/
 
 
 /* old
