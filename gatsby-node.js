@@ -2,6 +2,7 @@ const path = require(`path`)
 const { createFilePath } = require(`gatsby-source-filesystem`)
 const fetch = require("node-fetch")
 const csv2json = require("csvtojson")
+const { getPath, getWarTipPath } = require("./src/utils/urlHelper")
 
 // new
 const googleSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOQRLgLGVryieIwB7HKJbEATt_G9SfkbFX_H7mNC1x3i9D3ZhQpzfRBQTqfdt4954lgET6vpuxJrXd/pub?gid=0'
