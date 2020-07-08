@@ -4,7 +4,7 @@ const fetch = require("node-fetch")
 const csv2json = require("csvtojson")
 
 // new
-const googleSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOQRLgLGVryieIwB7HKJbEATt_G9SfkbFX_H7mNC1x3i9D3ZhQpzfRBQTqfdt4954lgET6vpuxJrXd/pubhtml?gid=0'
+const googleSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOQRLgLGVryieIwB7HKJbEATt_G9SfkbFX_H7mNC1x3i9D3ZhQpzfRBQTqfdt4954lgET6vpuxJrXd/pub?gid=0'
 const isDebug = process.env.DEBUG_MODE === "true"
 const GOOGLE_SPREADSHEET_ID = "14kreo2vRo1XCUXqFLcMApVtYmvkEzWBDm6b8fzJNKEc"
 
@@ -47,37 +47,6 @@ const createPublishedGoogleSpreadsheetNode = async (
     })
 }
 
-// don't know if this function is needed
-const createNode = async (
-  { actions: { createNode }, createNodeId, createContentDigest },
-  sheetName,
-  type
-) => {
-  // All table has first row reserved
-  const result = await fetch(
-    `https://docs.google.com/spreadsheets/d/${GOOGLE_SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${sheetName}&range=A2:ZZ&headers=0`
-  )
-  const data = await result.text()
-  const records = await csv2json().fromString(data)
-  records.forEach((p, i) => {
-    // create node for build time data example in the docs
-    const meta = {
-      // required fields
-      id: createNodeId(`${type.toLowerCase()}-${i}`),
-      parent: null,
-      children: [],
-      internal: {
-        type,
-        contentDigest: createContentDigest(p),
-      },
-    }
-    const node = Object.assign({}, p, meta)
-    createNode(node)
-  })
-}
-
-
-
 exports.sourceNodes = async props => {
   await Promise.all([
     createPublishedGoogleSpreadsheetNode(
@@ -90,43 +59,23 @@ exports.sourceNodes = async props => {
 }
 
 
-
-exports.createPages = async ({ graphql, actions }) => {
-  const { createPage } = actions
-  const result = await graphql(`
-    query {
-      allBlog {
-        edges {
-          node {
-            title_en
-            title_zh
-            description_en
-            description_zh
-            detail_en
-            detail_zh
-            date
-          }
-        }
-      }
+exports.onCreatePage = async ({ page, actions }) => {
+  const { createPage, deletePage } = actions
+  return new Promise(resolve => {
+    // If it is already eng path we skip to re-generate the locale
+    if (!page.path.match(/^\/en/)) {
+      deletePage(page)
+      createPage({
+          ...page,
+          path: getPath( page.path),
+          context: {
+          ...page.context,
+          },
+      })
     }
-  `)
 
-  if (result.errors) {
-    throw result.errors
-  }
-
-  exports.onCreateNode = ({ node, actions, getNode }) => {
-  const { createNodeField } = actions
-
-  if (node.internal.type === `MarkdownRemark`) {
-    const value = createFilePath({ node, getNode })
-    createNodeField({
-      name: `slug`,
-      node,
-      value,
-    })
-  }
-    }
+    resolve()
+  })
 }
 
 
