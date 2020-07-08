@@ -6,7 +6,6 @@ const csv2json = require("csvtojson")
 // new
 const googleSheet = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQOQRLgLGVryieIwB7HKJbEATt_G9SfkbFX_H7mNC1x3i9D3ZhQpzfRBQTqfdt4954lgET6vpuxJrXd/pub?gid=0'
 const isDebug = process.env.DEBUG_MODE === "true"
-const LANGUAGES = ["zh", "en"]
 const GOOGLE_SPREADSHEET_ID = "14kreo2vRo1XCUXqFLcMApVtYmvkEzWBDm6b8fzJNKEc"
 
 
@@ -65,16 +64,13 @@ exports.onCreatePage = async ({ page, actions }) => {
     // If it is already eng path we skip to re-generate the locale
     if (!page.path.match(/^\/en/)) {
       deletePage(page)
-      LANGUAGES.forEach(lang => {
         createPage({
           ...page,
-          path: getPath(lang, page.path),
+          path: getPath(page.path),
           context: {
             ...page.context,
-            locale: lang,
           },
         })
-      })
     }
 
     resolve()
